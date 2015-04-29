@@ -22,7 +22,7 @@ module INodeAgent
         result = {}
         disks = start.lines
         headers = disks.shift()
-        headers = headers.split(/[ ]{2,}|[ ][%]/)
+        headers = headers.split(/[ ]{2,}|[ ][%]|[%][ ]/)
         disks.each { |line|
             line = line.split(/[ ][0-9%]+/)
             mountedAt = line[7].strip()
