@@ -9,23 +9,15 @@ require "rubygems"
 require "bundler/setup"
 require "newrelic_plugin"
 
-module INodeAgent
-  class Agent < NewRelic::Plugin::Agent::Base
 
-    agent_guid "com.datazoos.newrelic.plugins.inode_monitor"
-    agent_version "1.0.1"
-    agent_config_options :hostname
-    agent_human_labels("Inode Agent") { "#{hostname}" }
-
-    def poll_cycle
         start = `df -i`
         result = {}
         disks = start.lines
         headers = disks.shift()
-        headers = headers.split(/[ ]{2,}|[ ][%]|[%][ ]/)
+        headers = headers.split(/[ ]{2,}|[ ][%]/)
         disks.each { |line|
             line = line.split(/[ ][0-9%]+/)
-            mountedAt = line[headers.length-1].strip()
+            mountedAt = line[7].strip()
             mountedFrom = line[0].strip()
             result[mountedFrom] = {}
 
@@ -36,20 +28,4 @@ module INodeAgent
                 i += 1
             }
         }
-
-        result.each { | disk, metric |
-            metric.each { | k, v|
-                report_metric("iNodes/#{disk}/#{k}",  "#{k}", v)
-            }
-        }
-
-
-    end
-
-  end
-
-  NewRelic::Plugin::Setup.install_agent :inode, INodeAgent
-
-  NewRelic::Plugin::Run.setup_and_run
-
-end
+puts result
