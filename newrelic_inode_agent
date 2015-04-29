@@ -21,22 +21,19 @@ module INodeAgent
         start = `df -i`
         result = {}
         disks = start.lines
-        disks.shift()
+        headers = disks.shift()
+        headers = headers.split(/[ ]{2,}|[ ][%]/)
         disks.each { |line|
             line = line.split(/[ ][0-9%]+/)
             mountedAt = line[7].strip()
             mountedFrom = line[0].strip()
+            result[mountedFrom] = {}
 
             diskUsage = `df -i #{mountedAt}`.lines[1].gsub(mountedFrom, "").gsub('%', "").split(/[ ]{1,}/)
-            result[mountedFrom] = {
-                "size" => diskUsage[1].strip(),
-                "used" => diskUsage[2].strip(),
-                "avail" => diskUsage[3].strip(),
-                "capacity" => diskUsage[4].strip(),
-                "iused" => diskUsage[5].strip(),
-                "ifree" => diskUsage[6].strip(),
-                "iused_pct" => diskUsage[7].strip(),
-                "mounted_on" => diskUsage[8].strip(),
+            i = 1
+            headers.each { |header|
+                result[mountedFrom][header] = diskUsage[i].strip()
+                i += 1
             }
         }
 
