@@ -10,22 +10,24 @@ require "bundler/setup"
 require "newrelic_plugin"
 
 
-        start = `df -i`
+
+        start = `df -i`.gsub('map ', 'map.')
+        start = start.gsub('Mounted on', 'Mounted_On')
         result = {}
         disks = start.lines
         headers = disks.shift()
-        headers = headers.split(/[ ]{2,}|[ ][%]/)
+        headers = headers.split(/[ ]{1,}/)
         disks.each { |line|
-            line = line.split(/[ ][0-9%]+/)
-            mountedAt = line[7].strip()
+            line = line.split(/[ ]{1,}/)
+            mountedAt = line[headers.length-1].strip()
+
             mountedFrom = line[0].strip()
             result[mountedFrom] = {}
-
-            diskUsage = `df -i #{mountedAt}`.lines[1].gsub(mountedFrom, "").gsub('%', "").split(/[ ]{1,}/)
-            i = 1
+            i = 0
             headers.each { |header|
-                result[mountedFrom][header] = diskUsage[i].strip()
+                header = header.gsub(/^%/, 'pct.').gsub(/%$/, '.pct').gsub(/%/, '.pct.').strip()
+                result[mountedFrom][header] = line[i].strip().gsub('%', '')
                 i += 1
             }
         }
-puts result
+        puts result.to_json
