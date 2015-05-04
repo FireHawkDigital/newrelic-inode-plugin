@@ -25,14 +25,13 @@ module INodeAgent
         headers = headers.split(/[ ]{1,}/)
         disks.each { |line|
             line = line.split(/[ ]{1,}/)
-            mountedAt = line[headers.length-1].strip()
 
-            mountedFrom = line[0].strip()
+            mountedFrom = line[0].strip().gsub(/^\/|\/$/, '')
             result[mountedFrom] = {}
             i = 0
             headers.each { |header|
                 header = header.gsub(/^%/, 'pct.').gsub(/%$/, '.pct').gsub(/%/, '.pct.').strip()
-                result[mountedFrom][header] = line[i].strip().gsub('%', '')
+                result[mountedFrom][header] = line[i].strip().gsub('%', '').strip().gsub(/^\/|\/$/, '')
                 i += 1
             }
         }
@@ -40,6 +39,7 @@ module INodeAgent
         result.each { | disk, metric |
             metric.each { | k, v|
                 report_metric("iNodes/#{disk}/#{k}",  "#{k}", v)
+                puts "Reporting usage for 'iNodes/#{disk}/#{k}' as #{v}"
             }
         }
 
