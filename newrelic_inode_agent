@@ -21,7 +21,7 @@ module INodeAgent
         start = start.gsub('Mounted on', 'Mounted_On')
         result = {}
         disks = start.lines
-        headers = disks.shift()
+        headers = disks.to_a.shift()
         headers = headers.split(/[ ]{1,}/)
         disks.each { |line|
             line = line.split(/[ ]{1,}/)
